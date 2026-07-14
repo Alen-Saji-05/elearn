@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls backend/apps)",
+      "Bash(ls backend *)",
+      "mcp__claude-in-chrome__get_page_text",
+      "mcp__claude-in-chrome__read_network_requests",
+      "mcp__claude-in-chrome__navigate",
+      "mcp__claude-in-chrome__read_console_messages",
+      "mcp__claude-in-chrome__computer",
+      "mcp__claude-in-chrome__find",
+      "Bash(venv/Scripts/python.exe manage.py seed_videos)",
+      "Bash(curl -s \"http://localhost:8000/api/courses/?page_size=1\")",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('status field:', d['results'][0].get\\('status'\\)\\)\")",
+      "Bash(curl -fsSL \"https://www.coursera.org/\")",
+      "Bash(grep -oiE '#[0-9a-f]{6}|font-family:[^;\"}]{0,60}|Source Sans|--[a-z-]*color[a-z-]*:[^;\"}]{0,20}')",
+      "Bash(curl -fsSL -A \"Mozilla/5.0\" \"https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/front-page/allStyles.cb03d76e0717860d0e7e.css\" -o /tmp/cds.css)",
+      "Read(//tmp/**)"
+    ]
+  }
+}
