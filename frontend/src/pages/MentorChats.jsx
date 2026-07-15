@@ -123,7 +123,7 @@ export default function MentorChats() {
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '1.5rem', alignItems: 'start' }}>
           {/* Thread list */}
-          <aside className="card" style={{ position: 'sticky', top: '1rem', maxHeight: '80vh', overflowY: 'auto' }}>
+          <aside className="card" style={{ position: 'sticky', top: 'calc(var(--topbar-h) + 1rem)', maxHeight: '80vh', overflowY: 'auto' }}>
             <h3 style={{ fontSize: '0.9rem', marginBottom: '0.75rem' }}>Conversations</h3>
             {threads.map(t => {
               const active = selected?.courseId === t.courseId && selected?.studentId === t.studentId;
@@ -135,7 +135,7 @@ export default function MentorChats() {
                     padding: '0.6rem 0.7rem', borderRadius: '8px', cursor: 'pointer',
                     marginBottom: '0.35rem',
                     background: active ? 'var(--accent-gradient)' : 'transparent',
-                    color: active ? '#fff' : 'var(--text-secondary)',
+                    color: active ? 'var(--accent-ink)' : 'var(--text-secondary)',
                   }}
                 >
                   <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{t.studentName}</div>

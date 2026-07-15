@@ -17,7 +17,7 @@ export default function Home() {
       <section className="hero">
         <h1>
           Learn Without Limits,<br />
-          <span className="gradient-text">Grow Without Boundaries</span>
+          <span className="hero-accent">Grow Without Boundaries</span>
         </h1>
         <p>
           Master new skills with expert-led courses. From coding to creativity,

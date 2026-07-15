@@ -155,7 +155,7 @@ export default function LessonPlayer() {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: '1.5rem', alignItems: 'start' }}>
       {/* Curriculum sidebar */}
-      <aside className="card" style={{ position: 'sticky', top: '1rem', maxHeight: '85vh', overflowY: 'auto' }}>
+      <aside className="card" style={{ position: 'sticky', top: 'calc(var(--topbar-h) + 1rem)', maxHeight: '85vh', overflowY: 'auto' }}>
         <Link to={`/courses/${course.slug}`} style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>← {course.title}</Link>
         <div style={{ margin: '0.75rem 0' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '0.3rem' }}>
@@ -178,7 +178,7 @@ export default function LessonPlayer() {
                     padding: '0.5rem 0.6rem', borderRadius: '8px', cursor: 'pointer',
                     fontSize: '0.85rem',
                     background: active ? 'var(--accent-gradient)' : 'transparent',
-                    color: active ? '#fff' : 'var(--text-secondary)',
+                    color: active ? 'var(--accent-ink)' : 'var(--text-secondary)',
                   }}
                 >
                   <span>{done ? '✅' : (CONTENT_ICONS[lesson.content_type] || '📖')}</span>
