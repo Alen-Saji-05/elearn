@@ -28,7 +28,6 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_filters',
     'channels',
-    'django_elasticsearch_dsl',
     # Local apps
     'apps.users',
     'apps.courses',
@@ -37,8 +36,13 @@ INSTALLED_APPS = [
     'apps.reviews',
     'apps.chat',
     'apps.notifications',
-    'apps.search',
 ]
+
+# Elasticsearch is optional. Off by default so the app runs without an ES
+# server (e.g. Render free tier). Set USE_ELASTICSEARCH=True to enable.
+USE_ELASTICSEARCH = os.getenv('USE_ELASTICSEARCH', 'False').lower() in ('true', '1', 'yes')
+if USE_ELASTICSEARCH:
+    INSTALLED_APPS += ['django_elasticsearch_dsl', 'apps.search']
 
 # =============================================================================
 # MIDDLEWARE
@@ -140,6 +144,7 @@ SIMPLE_JWT = {
 # =============================================================================
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:5173')
 CORS_ALLOWED_ORIGINS = [FRONTEND_URL]
+CSRF_TRUSTED_ORIGINS = [FRONTEND_URL]
 CORS_ALLOW_CREDENTIALS = True
 
 # =============================================================================

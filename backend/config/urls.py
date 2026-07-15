@@ -12,8 +12,10 @@ urlpatterns = [
     path('api/reviews/', include('apps.reviews.urls')),
     path('api/chat/', include('apps.chat.urls')),
     path('api/notifications/', include('apps.notifications.urls')),
-    path('api/search/', include('apps.search.urls')),
 ]
+
+if settings.USE_ELASTICSEARCH:
+    urlpatterns += [path('api/search/', include('apps.search.urls'))]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

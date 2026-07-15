@@ -1,0 +1,71 @@
+# Render Blueprint — LearnHub (free tier, no Elasticsearch)
+# If you already created the Postgres + Redis manually, delete the `databases:`
+# block and the `learnhub-redis` service, then set DB_* / REDIS_URL by hand.
+
+databases:
+  - name: learnhub-db
+    databaseName: learnhubdb
+    user: admin
+    plan: free
+
+services:
+  # Redis (Channels layer)
+  - type: keyvalue
+    name: learnhub-redis
+    plan: free
+    ipAllowList: []
+
+  # Django backend (ASGI / Daphne — serves REST + WebSockets)
+  - type: web
+    name: learnhub-backend
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate
+    startCommand: daphne -b 0.0.0.0 -p $PORT config.asgi:application
+    healthCheckPath: /api/courses/
+    envVars:
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: PYTHON_VERSION
+        value: "3.12.0"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DB_HOST
+        fromDatabase: { name: learnhub-db, property: host }
+      - key: DB_PORT
+        fromDatabase: { name: learnhub-db, property: port }
+      - key: DB_NAME
+        fromDatabase: { name: learnhub-db, property: database }
+      - key: DB_USER
+        fromDatabase: { name: learnhub-db, property: user }
+      - key: DB_PASSWORD
+        fromDatabase: { name: learnhub-db, property: password }
+      - key: REDIS_URL
+        fromService: { name: learnhub-redis, type: keyvalue, property: connectionString }
+      # Set these in the dashboard (secrets / cross-service URL):
+      - key: FRONTEND_URL
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      # Leave USE_ELASTICSEARCH unset (defaults off)
+
+  # React frontend (static site)
+  - type: web
+    name: learnhub-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    envVars:
+      # Set to the backend URL, e.g. https://learnhub-backend.onrender.com
+      - key: VITE_API_URL
+        sync: false
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

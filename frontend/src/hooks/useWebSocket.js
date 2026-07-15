@@ -9,8 +9,12 @@ export function useWebSocket(courseId, studentId) {
     const tokens = JSON.parse(localStorage.getItem('tokens') || '{}');
     if (!tokens.access || !courseId || !studentId) return;
 
-    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    const wsUrl = `${protocol}://${window.location.host}/ws/chat/${courseId}/${studentId}/?token=${tokens.access}`;
+    // Dev: same host (Vite proxies /ws). Prod: backend origin via VITE_API_URL.
+    const apiUrl = import.meta.env.VITE_API_URL;
+    const wsBase = apiUrl
+      ? apiUrl.replace(/^http/, 'ws')
+      : `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}`;
+    const wsUrl = `${wsBase}/ws/chat/${courseId}/${studentId}/?token=${tokens.access}`;
 
     const ws = new WebSocket(wsUrl);
     socketRef.current = ws;

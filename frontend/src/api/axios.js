@@ -1,7 +1,11 @@
 import axios from 'axios';
 
+// In dev, Vite proxies /api. In prod (Render), the frontend is a separate
+// origin, so point at the backend via VITE_API_URL.
+const API_BASE = (import.meta.env.VITE_API_URL || '') + '/api';
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: API_BASE,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -42,7 +46,7 @@ api.interceptors.response.use(
 
       if (tokens.refresh) {
         try {
-          const res = await axios.post('/api/users/token/refresh/', {
+          const res = await axios.post(`${API_BASE}/users/token/refresh/`, {
             refresh: tokens.refresh,
           });
           const newTokens = {

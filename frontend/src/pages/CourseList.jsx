@@ -48,8 +48,10 @@ export default function CourseList() {
     if (searchQuery.length < 2) { setSuggestions([]); return; }
     const timer = setTimeout(async () => {
       try {
-        const res = await api.get(`/search/autocomplete/?q=${searchQuery}`);
-        setSuggestions(res.data.suggestions || []);
+        // ORM-based autocomplete (no Elasticsearch dependency)
+        const res = await api.get(`/courses/?search=${searchQuery}&page_size=5`);
+        const items = res.data.results || res.data;
+        setSuggestions(items.map(c => ({ id: c.slug || c.id, title: c.title })));
       } catch { setSuggestions([]); }
     }, 300);
     return () => clearTimeout(timer);
