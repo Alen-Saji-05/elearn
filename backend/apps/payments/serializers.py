@@ -14,4 +14,4 @@ class PaymentSerializer(serializers.ModelSerializer):
 
 class CheckoutSerializer(serializers.Serializer):
     course_id = serializers.IntegerField()
-    provider = serializers.ChoiceField(choices=['STRIPE', 'PAYPAL'])
+    provider = serializers.ChoiceField(choices=['STRIPE'], default='STRIPE')

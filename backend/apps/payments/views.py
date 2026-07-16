@@ -7,7 +7,7 @@ from django.http import HttpResponse
 
 from .models import Payment
 from .serializers import PaymentSerializer, CheckoutSerializer
-from .services import StripeService, PayPalService
+from .services import StripeService
 from apps.courses.models import Course
 from apps.enrollments.models import Enrollment
 from apps.users.permissions import IsStudent, IsAdmin
@@ -46,27 +46,12 @@ class CheckoutView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        provider = serializer.validated_data['provider']
-
-        if provider == 'STRIPE':
-            service = StripeService()
-            session, payment = service.create_checkout_session(request.user, course)
-            return Response({
-                'checkout_url': session.url,
-                'payment_id': payment.id,
-            })
-        elif provider == 'PAYPAL':
-            service = PayPalService()
-            approval_url, payment = service.create_payment(request.user, course)
-            if approval_url:
-                return Response({
-                    'checkout_url': approval_url,
-                    'payment_id': payment.id,
-                })
-            return Response(
-                {'error': 'Failed to create PayPal payment.'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+        service = StripeService()
+        session, payment = service.create_checkout_session(request.user, course)
+        return Response({
+            'checkout_url': session.url,
+            'payment_id': payment.id,
+        })
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -111,31 +96,6 @@ class StripeConfirmView(APIView):
         )
 
 
-class PayPalExecuteView(APIView):
-    """Execute a PayPal payment after user approval."""
-    permission_classes = [IsStudent]
-
-    def post(self, request):
-        payment_id = request.data.get('payment_id')
-        payer_id = request.data.get('payer_id')
-
-        if not payment_id or not payer_id:
-            return Response(
-                {'error': 'payment_id and payer_id are required.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        service = PayPalService()
-        payment = service.execute_payment(payment_id, payer_id)
-
-        if payment:
-            return Response(PaymentSerializer(payment).data)
-        return Response(
-            {'error': 'Payment execution failed.'},
-            status=status.HTTP_400_BAD_REQUEST
-        )
-
-
 class RefundView(APIView):
     """Admin: process a refund."""
     permission_classes = [IsAdmin]
@@ -149,11 +109,7 @@ class RefundView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        if payment.provider == 'STRIPE':
-            service = StripeService()
-        else:
-            service = PayPalService()
-
+        service = StripeService()
         refunded = service.refund(payment)
         return Response(PaymentSerializer(refunded).data)
 

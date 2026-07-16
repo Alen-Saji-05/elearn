@@ -21,7 +21,6 @@ django-elasticsearch-dsl-drf>=0.22,<1.0
 
 # Payments
 stripe>=8.0,<9.0
-paypalrestsdk>=1.13,<2.0
 
 # PDF / Certificates
 reportlab>=4.1,<5.0

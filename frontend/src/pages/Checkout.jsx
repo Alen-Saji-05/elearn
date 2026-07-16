@@ -9,11 +9,9 @@ export default function Checkout() {
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
-  const [provider, setProvider] = useState('STRIPE');
 
   // Check for success/cancel
   const sessionId = searchParams.get('session_id');
-  const paymentProvider = searchParams.get('provider');
   const isSuccess = window.location.pathname.includes('/payment/success');
   const isCancel = window.location.pathname.includes('/payment/cancel');
   const [confirmError, setConfirmError] = useState(false);
@@ -50,7 +48,7 @@ export default function Checkout() {
     try {
       const res = await api.post('/payments/checkout/', {
         course_id: course.id,
-        provider,
+        provider: 'STRIPE',
       });
       window.location.href = res.data.checkout_url;
     } catch (err) {
@@ -117,24 +115,6 @@ export default function Checkout() {
           </div>
         </div>
 
-        <div className="form-group">
-          <label className="form-label">Payment Method</label>
-          <div className="role-selector" style={{ gridTemplateColumns: '1fr 1fr' }}>
-            <div
-              className={`role-option ${provider === 'STRIPE' ? 'selected' : ''}`}
-              onClick={() => setProvider('STRIPE')}
-            >
-              Stripe
-            </div>
-            <div
-              className={`role-option ${provider === 'PAYPAL' ? 'selected' : ''}`}
-              onClick={() => setProvider('PAYPAL')}
-            >
-              PayPal
-            </div>
-          </div>
-        </div>
-
         <button
           className="btn btn-primary btn-lg"
           style={{ width: '100%' }}
@@ -145,7 +125,7 @@ export default function Checkout() {
         </button>
 
         <p style={{ textAlign: 'center', marginTop: '1rem', fontSize: '0.8rem', color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '0.35rem', width: '100%', justifyContent: 'center' }}>
-          <Icon name="lock" size={14} /> Secure payment powered by {provider === 'STRIPE' ? 'Stripe' : 'PayPal'}
+          <Icon name="lock" size={14} /> Secure payment powered by Stripe
         </p>
       </div>
     </div>

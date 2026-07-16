@@ -1,5 +1,4 @@
 import stripe
-import paypalrestsdk
 from django.conf import settings
 
 from .models import Payment
@@ -130,95 +129,5 @@ class StripeService:
         Enrollment.objects.filter(
             student=payment.user, course=payment.course
         ).update(status='REFUNDED')
-
-        return payment
-
-
-class PayPalService:
-    """Handle PayPal payment operations."""
-
-    def __init__(self):
-        paypalrestsdk.configure({
-            'mode': settings.PAYPAL_MODE,
-            'client_id': settings.PAYPAL_CLIENT_ID,
-            'client_secret': settings.PAYPAL_CLIENT_SECRET,
-        })
-
-    def create_payment(self, user, course):
-        """Create a PayPal payment."""
-        payment_record = Payment.objects.create(
-            user=user,
-            course=course,
-            amount=course.price,
-            provider='PAYPAL',
-            status='PENDING'
-        )
-
-        paypal_payment = paypalrestsdk.Payment({
-            'intent': 'sale',
-            'payer': {'payment_method': 'paypal'},
-            'redirect_urls': {
-                'return_url': f"{settings.FRONTEND_URL}/payment/success?provider=paypal&payment_id={payment_record.id}",
-                'cancel_url': f"{settings.FRONTEND_URL}/payment/cancel",
-            },
-            'transactions': [{
-                'amount': {
-                    'total': str(course.price),
-                    'currency': 'USD',
-                },
-                'description': course.title,
-                'custom': str(payment_record.id),
-            }],
-        })
-
-        if paypal_payment.create():
-            payment_record.provider_session_id = paypal_payment.id
-            payment_record.save()
-
-            # Get approval URL
-            for link in paypal_payment.links:
-                if link.rel == 'approval_url':
-                    return link.href, payment_record
-
-        return None, payment_record
-
-    def execute_payment(self, payment_id, payer_id):
-        """Execute an approved PayPal payment."""
-        try:
-            payment_record = Payment.objects.get(pk=payment_id)
-        except Payment.DoesNotExist:
-            return None
-
-        paypal_payment = paypalrestsdk.Payment.find(payment_record.provider_session_id)
-        if paypal_payment.execute({'payer_id': payer_id}):
-            payment_record.status = 'COMPLETED'
-            payment_record.provider_payment_id = paypal_payment.id
-            payment_record.save()
-
-            # Create enrollment
-            enrollment, created = Enrollment.objects.get_or_create(
-                student=payment_record.user,
-                course=payment_record.course
-            )
-            if created:
-                payment_record.course.total_enrollments += 1
-                payment_record.course.save()
-
-            return payment_record
-        return None
-
-    def refund(self, payment):
-        """Process a PayPal refund."""
-        paypal_payment = paypalrestsdk.Payment.find(payment.provider_payment_id)
-        sale_id = paypal_payment.transactions[0].related_resources[0].sale.id
-        sale = paypalrestsdk.Sale.find(sale_id)
-        refund = sale.refund({'amount': {'total': str(payment.amount), 'currency': 'USD'}})
-
-        if refund.success():
-            payment.status = 'REFUNDED'
-            payment.save()
-            Enrollment.objects.filter(
-                student=payment.user, course=payment.course
-            ).update(status='REFUNDED')
 
         return payment

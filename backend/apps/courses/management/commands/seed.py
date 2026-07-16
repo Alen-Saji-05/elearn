@@ -349,7 +349,7 @@ class Command(BaseCommand):
                     user=enrollment.student,
                     course=enrollment.course,
                     amount=enrollment.course.price,
-                    provider=random.choice(['STRIPE', 'PAYPAL']),
+                    provider='STRIPE',
                     provider_payment_id=f'demo_{enrollment.id}_{random.randint(1000,9999)}',
                     status='COMPLETED',
                 )
