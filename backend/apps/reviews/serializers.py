@@ -11,7 +11,8 @@ class ReviewSerializer(serializers.ModelSerializer):
         fields = ('id', 'student', 'student_name', 'student_avatar',
                   'course', 'rating', 'comment', 'is_approved',
                   'is_reported', 'created_at')
-        read_only_fields = ('id', 'student', 'is_approved', 'is_reported', 'created_at')
+        read_only_fields = ('id', 'student', 'course', 'is_approved',
+                            'is_reported', 'created_at')
 
     def get_student_name(self, obj):
         name = f"{obj.student.first_name} {obj.student.last_name}".strip()

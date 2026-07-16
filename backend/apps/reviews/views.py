@@ -34,7 +34,16 @@ class CourseReviewsView(generics.ListCreateAPIView):
             from rest_framework.exceptions import PermissionDenied
             raise PermissionDenied('You must be enrolled to review this course.')
 
-        serializer.save(course_id=course_pk)
+        # One review per (student, course): re-submitting updates the existing one.
+        review, _ = Review.objects.update_or_create(
+            student=self.request.user,
+            course_id=course_pk,
+            defaults={
+                'rating': serializer.validated_data['rating'],
+                'comment': serializer.validated_data.get('comment', ''),
+            },
+        )
+        serializer.instance = review
 
 
 class MyReviewView(generics.RetrieveUpdateDestroyAPIView):
