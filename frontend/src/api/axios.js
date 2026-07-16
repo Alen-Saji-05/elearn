@@ -29,6 +29,16 @@ api.interceptors.request.use(
     if (tokens.access) {
       config.headers.Authorization = `Bearer ${tokens.access}`;
     }
+    // For file uploads (FormData), drop the default JSON Content-Type so the
+    // browser sets multipart/form-data with the correct boundary — otherwise
+    // the file arrives as a string and DRF rejects it ("was not a file").
+    if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+      if (typeof config.headers.delete === 'function') {
+        config.headers.delete('Content-Type');
+      } else {
+        delete config.headers['Content-Type'];
+      }
+    }
     return config;
   },
   (error) => Promise.reject(error)
