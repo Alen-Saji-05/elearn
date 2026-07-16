@@ -38,10 +38,8 @@ class EnrollmentListSerializer(serializers.ModelSerializer):
     """Lightweight enrollment for dashboard."""
     course_title = serializers.CharField(source='course.title', read_only=True)
     course_slug = serializers.CharField(source='course.slug', read_only=True)
-    course_thumbnail = serializers.ImageField(source='course.thumbnail', read_only=True)
 
     class Meta:
         model = Enrollment
         fields = ('id', 'course', 'course_title', 'course_slug',
-                  'course_thumbnail', 'status', 'progress_percent',
-                  'enrolled_at')
+                  'status', 'progress_percent', 'enrolled_at')

@@ -76,14 +76,10 @@ export default function Home() {
           {featuredCourses.map(course => (
             <Link to={`/courses/${course.slug || course.id}`} key={course.id} style={{ textDecoration: 'none', color: 'inherit' }}>
               <div className="card course-card">
-                {course.thumbnail ? (
-                  <img src={course.thumbnail} alt={course.title} className="card-thumbnail" />
-                ) : (
-                  <div className="card-thumbnail" style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: 'var(--accent-ink)', background: 'var(--accent-gradient)'
-                  }}><Icon name="book" size={40} /></div>
-                )}
+                <div className="card-thumbnail" style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: 'var(--accent-ink)', background: 'var(--accent-gradient)'
+                }}><Icon name="book" size={40} /></div>
                 <div className="card-body">
                   <h3 className="card-title">{course.title}</h3>
                   <p className="card-desc">{course.short_description || course.description}</p>

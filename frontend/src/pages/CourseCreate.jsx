@@ -18,19 +18,11 @@ export default function CourseCreate() {
     price: '0', level: 'BEGINNER', language: 'English',
     tags: '', duration_hours: '0', status: 'DRAFT',
   });
-  const [thumbnail, setThumbnail] = useState(null);
-  const [thumbPreview, setThumbPreview] = useState('');
   const [modules, setModules] = useState([emptyModule()]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const setField = (k, v) => setForm(f => ({ ...f, [k]: v }));
-
-  const onThumb = (e) => {
-    const file = e.target.files?.[0];
-    setThumbnail(file || null);
-    setThumbPreview(file ? URL.createObjectURL(file) : '');
-  };
 
   // --- module / lesson / quiz helpers ---
   const updateModule = (mi, patch) =>
@@ -96,19 +88,18 @@ export default function CourseCreate() {
     setError('');
     setLoading(true);
     try {
-      // 1. Create the course (multipart so the thumbnail uploads)
-      const fd = new FormData();
-      fd.append('title', form.title);
-      fd.append('description', form.description);
-      fd.append('short_description', form.short_description);
-      fd.append('price', String(parseFloat(form.price) || 0));
-      fd.append('level', form.level);
-      fd.append('language', form.language);
-      fd.append('tags', form.tags);
-      fd.append('duration_hours', String(parseInt(form.duration_hours) || 0));
-      fd.append('status', form.status);
-      if (thumbnail) fd.append('thumbnail', thumbnail);
-      const courseRes = await api.post('/courses/', fd);
+      // 1. Create the course
+      const courseRes = await api.post('/courses/', {
+        title: form.title,
+        description: form.description,
+        short_description: form.short_description,
+        price: parseFloat(form.price) || 0,
+        level: form.level,
+        language: form.language,
+        tags: form.tags,
+        duration_hours: parseInt(form.duration_hours) || 0,
+        status: form.status,
+      });
       const course = courseRes.data;
 
       // 2. Create modules → lessons → quizzes → questions
@@ -174,22 +165,6 @@ export default function CourseCreate() {
         {/* ---- Course details ---- */}
         <div className="card" style={{ marginBottom: '1.5rem' }}>
           <h2 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>Course Details</h2>
-
-          <div className="form-group">
-            <label className="form-label">Thumbnail</label>
-            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-              <div style={{
-                width: 160, height: 90, borderRadius: 'var(--radius-md)', overflow: 'hidden',
-                background: 'var(--bg-tertiary)', display: 'flex', alignItems: 'center',
-                justifyContent: 'center', color: 'var(--text-muted)', flexShrink: 0,
-              }}>
-                {thumbPreview
-                  ? <img src={thumbPreview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  : <Icon name="book" size={28} />}
-              </div>
-              <input type="file" accept="image/*" onChange={onThumb} className="form-input" />
-            </div>
-          </div>
 
           <div className="form-group">
             <label className="form-label">Course Title *</label>
