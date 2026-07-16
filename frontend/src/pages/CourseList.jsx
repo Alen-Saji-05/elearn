@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import Icon from '../components/Icon';
 import api from '../api/axios';
 
 export default function CourseList() {
@@ -67,7 +68,7 @@ export default function CourseList() {
       {/* Search */}
       <div className="search-container" style={{ margin: '0 auto 2rem', maxWidth: 700 }}>
         <form onSubmit={handleSearch}>
-          <span className="search-icon">🔍</span>
+          <span className="search-icon"><Icon name="search" size={18} /></span>
           <input
             id="course-search-input"
             type="text"
@@ -171,7 +172,7 @@ export default function CourseList() {
             <div className="loading-spinner"><div className="spinner"></div></div>
           ) : courses.length === 0 ? (
             <div className="empty-state">
-              <div className="empty-icon">🔍</div>
+              <div className="empty-icon"><Icon name="search" size={44} /></div>
               <h3>No courses found</h3>
               <p>Try adjusting your filters or search terms</p>
             </div>
@@ -185,8 +186,8 @@ export default function CourseList() {
                     ) : (
                       <div className="card-thumbnail" style={{
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: '2.5rem', background: 'var(--accent-gradient)'
-                      }}>📘</div>
+                        color: 'var(--accent-ink)', background: 'var(--accent-gradient)'
+                      }}><Icon name="book" size={40} /></div>
                     )}
                     <div className="card-body">
                       <h3 className="card-title">{course.title}</h3>

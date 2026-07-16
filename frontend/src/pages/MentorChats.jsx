@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useWebSocket } from '../hooks/useWebSocket';
+import Icon from '../components/Icon';
 import api from '../api/axios';
 
 export default function MentorChats() {
@@ -110,13 +111,13 @@ export default function MentorChats() {
   return (
     <div className="animate-fade-in">
       <div className="dashboard-header">
-        <h1>💬 Q&A Inbox</h1>
+        <h1>Q&A Inbox</h1>
         <p>Private questions from your students. Each thread is visible only to you and that student.</p>
       </div>
 
       {threads.length === 0 ? (
         <div className="empty-state">
-          <div className="empty-icon">💬</div>
+          <div className="empty-icon"><Icon name="chat" size={44} /></div>
           <h3>No questions yet</h3>
           <p>When a student asks a question in one of your courses, it appears here.</p>
         </div>
@@ -152,7 +153,7 @@ export default function MentorChats() {
           <main className="chat-panel" style={{ minHeight: '60vh' }}>
             <div className="chat-header">
               {selected ? `${selected.studentName} · ${selected.courseTitle}` : 'Select a conversation'}
-              {connected && <span className="badge badge-green" style={{ marginLeft: 'auto' }}>● Live</span>}
+              {connected && <span className="badge badge-green" style={{ marginLeft: 'auto' }}>Live</span>}
             </div>
             <div className="chat-messages" style={{ maxHeight: '55vh' }}>
               {messages.length === 0 ? (
@@ -165,7 +166,7 @@ export default function MentorChats() {
                     </div>
                     <div className="chat-bubble">
                       <div className={`sender-name ${msg.sender_role === 'MENTOR' ? 'mentor' : ''}`}>
-                        {msg.sender_name || msg.sender} {msg.sender_role === 'MENTOR' && '🏅'}
+                        {msg.sender_name || msg.sender}{msg.sender_role === 'MENTOR' && ' · Mentor'}
                       </div>
                       <div className="message-text">{msg.content}</div>
                       <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
@@ -191,7 +192,7 @@ export default function MentorChats() {
                 borderTop: '1px solid var(--border)',
               }}>
                 <span>Replying to "{replyTo.content.slice(0, 40)}"</span>
-                <button className="btn btn-ghost btn-sm" onClick={() => setReplyTo(null)}>✕</button>
+                <button className="btn btn-ghost btn-sm" onClick={() => setReplyTo(null)}>Cancel</button>
               </div>
             )}
 

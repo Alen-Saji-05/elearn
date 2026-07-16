@@ -12,6 +12,7 @@ Creates:
 """
 import random
 from decimal import Decimal
+from django.core.management import call_command
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from django.utils.text import slugify
@@ -445,7 +446,7 @@ class Command(BaseCommand):
             Notification.objects.create(
                 user=student,
                 type='ANNOUNCEMENT',
-                title='Welcome to LearnHub! !',
+                title='Welcome to LearnHub!',
                 message='Start exploring our courses and accelerate your learning journey.',
                 link='/courses',
             )
@@ -454,6 +455,14 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(
             f'  * Created {notifs_created} notifications'
         ))
+
+        # ─── VIDEOS & RICH CONTENT ───────────────────────────────
+        # Attach topic-matched videos, then expand reading notes and add a real
+        # quiz to every module — so a single `seed --flush` produces rich content.
+        self.stdout.write('')
+        self.stdout.write('* Attaching videos and enriching lessons...')
+        call_command('seed_videos')
+        call_command('enrich_content')
 
         # ─── SUMMARY ─────────────────────────────────────────────
         self.stdout.write('')
@@ -521,34 +530,8 @@ class Command(BaseCommand):
                         'is_preview': les_order == 1,  # First lesson is preview
                     }
                 )
-
-                # Add a quiz to every 3rd lesson
-                if les_order % 3 == 0:
-                    quiz, _ = Quiz.objects.get_or_create(
-                        lesson=lesson,
-                        title=f'Quiz: {les_title}',
-                    )
-                    questions = [
-                        {
-                            'text': f'What is a key concept covered in "{les_title}"?',
-                            'options': ['Concept A', 'Concept B', 'Concept C', 'Concept D'],
-                            'correct': 0,
-                        },
-                        {
-                            'text': f'Which of the following best describes the main topic of this lesson?',
-                            'options': ['Option 1', 'Option 2', 'Option 3', 'Option 4'],
-                            'correct': 1,
-                        },
-                    ]
-                    for q_order, q in enumerate(questions, start=1):
-                        QuizQuestion.objects.get_or_create(
-                            quiz=quiz,
-                            text=q['text'],
-                            defaults={
-                                'options': q['options'],
-                                'correct_answer': q['correct'],
-                                'order': q_order,
-                            }
-                        )
+                # Quizzes are added by the `enrich_content` command (called at the
+                # end of handle()), which gives every module a quiz with real,
+                # answerable questions instead of placeholder options.
 
         return course

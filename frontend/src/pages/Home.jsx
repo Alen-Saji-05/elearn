@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import Icon from '../components/Icon';
 import api from '../api/axios';
 
 export default function Home() {
@@ -36,28 +37,28 @@ export default function Home() {
       {/* Stats */}
       <section className="stats-grid" style={{ maxWidth: 800, margin: '0 auto 3rem' }}>
         <div className="stat-card">
-          <div className="stat-icon purple">📚</div>
+          <div className="stat-icon purple"><Icon name="courses" /></div>
           <div>
             <div className="stat-value">500+</div>
             <div className="stat-label">Courses</div>
           </div>
         </div>
         <div className="stat-card">
-          <div className="stat-icon green">👨‍🎓</div>
+          <div className="stat-icon green"><Icon name="users" /></div>
           <div>
             <div className="stat-value">10K+</div>
             <div className="stat-label">Students</div>
           </div>
         </div>
         <div className="stat-card">
-          <div className="stat-icon yellow">👨‍🏫</div>
+          <div className="stat-icon yellow"><Icon name="cap" /></div>
           <div>
             <div className="stat-value">100+</div>
             <div className="stat-label">Mentors</div>
           </div>
         </div>
         <div className="stat-card">
-          <div className="stat-icon red">🏆</div>
+          <div className="stat-icon red"><Icon name="award" /></div>
           <div>
             <div className="stat-value">95%</div>
             <div className="stat-label">Satisfaction</div>
@@ -68,7 +69,7 @@ export default function Home() {
       {/* Featured Courses */}
       <section>
         <div className="section-header">
-          <h2>🔥 Popular Courses</h2>
+          <h2>Popular Courses</h2>
           <Link to="/courses" className="btn btn-ghost">View All →</Link>
         </div>
         <div className="course-grid">
@@ -80,16 +81,16 @@ export default function Home() {
                 ) : (
                   <div className="card-thumbnail" style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '2.5rem', background: 'var(--accent-gradient)'
-                  }}>📘</div>
+                    color: 'var(--accent-ink)', background: 'var(--accent-gradient)'
+                  }}><Icon name="book" size={40} /></div>
                 )}
                 <div className="card-body">
                   <h3 className="card-title">{course.title}</h3>
                   <p className="card-desc">{course.short_description || course.description}</p>
                   <div className="card-meta">
                     <span className="rating-display">★ {course.avg_rating || '0.00'}</span>
-                    <span>👤 {course.mentor?.first_name || course.mentor?.username || 'Mentor'}</span>
-                    <span>📊 {course.level}</span>
+                    <span>{course.mentor?.first_name || course.mentor?.username || 'Mentor'}</span>
+                    <span>{course.level}</span>
                   </div>
                 </div>
                 <div className="card-footer">
@@ -106,7 +107,7 @@ export default function Home() {
         </div>
         {featuredCourses.length === 0 && (
           <div className="empty-state">
-            <div className="empty-icon">📚</div>
+            <div className="empty-icon"><Icon name="courses" size={44} /></div>
             <h3>No courses yet</h3>
             <p>Be the first to create a course!</p>
           </div>

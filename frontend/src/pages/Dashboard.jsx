@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import Icon from '../components/Icon';
 import api from '../api/axios';
 
 export default function Dashboard() {
@@ -50,9 +51,9 @@ export default function Dashboard() {
     <div className="animate-fade-in">
       <div className="dashboard-header">
         <h1>
-          {user.role === 'STUDENT' && '📚 My Learning'}
-          {user.role === 'MENTOR' && '👨‍🏫 Mentor Dashboard'}
-          {user.role === 'ADMIN' && '🛡️ Admin Dashboard'}
+          {user.role === 'STUDENT' && 'My Learning'}
+          {user.role === 'MENTOR' && 'Mentor Dashboard'}
+          {user.role === 'ADMIN' && 'Admin Dashboard'}
         </h1>
         <p>Welcome back, {user.first_name || user.username}!</p>
       </div>
@@ -62,21 +63,21 @@ export default function Dashboard() {
         <div>
           <div className="stats-grid">
             <div className="stat-card">
-              <div className="stat-icon purple">📚</div>
+              <div className="stat-icon purple"><Icon name="courses" /></div>
               <div>
                 <div className="stat-value">{enrollments.length}</div>
                 <div className="stat-label">Enrolled Courses</div>
               </div>
             </div>
             <div className="stat-card">
-              <div className="stat-icon green">✅</div>
+              <div className="stat-icon green"><Icon name="check" /></div>
               <div>
                 <div className="stat-value">{enrollments.filter(e => e.status === 'COMPLETED').length}</div>
                 <div className="stat-label">Completed</div>
               </div>
             </div>
             <div className="stat-card">
-              <div className="stat-icon yellow">📖</div>
+              <div className="stat-icon yellow"><Icon name="text" /></div>
               <div>
                 <div className="stat-value">{enrollments.filter(e => e.status === 'ACTIVE').length}</div>
                 <div className="stat-label">In Progress</div>
@@ -91,7 +92,7 @@ export default function Dashboard() {
 
           {enrollments.length === 0 ? (
             <div className="empty-state">
-              <div className="empty-icon">📚</div>
+              <div className="empty-icon"><Icon name="courses" size={44} /></div>
               <h3>No courses yet</h3>
               <p>Start learning by enrolling in a course!</p>
               <Link to="/courses" className="btn btn-primary" style={{ marginTop: '1rem' }}>Browse Courses</Link>
@@ -106,8 +107,8 @@ export default function Dashboard() {
                     ) : (
                       <div className="card-thumbnail" style={{
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: '2.5rem', background: 'var(--accent-gradient)'
-                      }}>📘</div>
+                        color: 'var(--accent-ink)', background: 'var(--accent-gradient)'
+                      }}><Icon name="book" size={40} /></div>
                     )}
                     <div className="card-body">
                       <h3 className="card-title">{enrollment.course_title}</h3>
@@ -140,21 +141,21 @@ export default function Dashboard() {
         <div>
           <div className="stats-grid">
             <div className="stat-card">
-              <div className="stat-icon purple">📚</div>
+              <div className="stat-icon purple"><Icon name="courses" /></div>
               <div>
                 <div className="stat-value">{courses.length}</div>
                 <div className="stat-label">My Courses</div>
               </div>
             </div>
             <div className="stat-card">
-              <div className="stat-icon green">✅</div>
+              <div className="stat-icon green"><Icon name="check" /></div>
               <div>
                 <div className="stat-value">{courses.filter(c => c.status === 'PUBLISHED').length}</div>
                 <div className="stat-label">Published</div>
               </div>
             </div>
             <div className="stat-card">
-              <div className="stat-icon yellow">⏳</div>
+              <div className="stat-icon yellow"><Icon name="clock" /></div>
               <div>
                 <div className="stat-value">{courses.filter(c => c.status === 'PENDING').length}</div>
                 <div className="stat-label">Pending Approval</div>
@@ -169,7 +170,7 @@ export default function Dashboard() {
 
           {courses.length === 0 ? (
             <div className="empty-state">
-              <div className="empty-icon">👨‍🏫</div>
+              <div className="empty-icon"><Icon name="cap" size={44} /></div>
               <h3>No courses yet</h3>
               <p>Create your first course and start teaching!</p>
               <Link to="/courses/create" className="btn btn-primary" style={{ marginTop: '1rem' }}>Create Course</Link>
@@ -179,10 +180,14 @@ export default function Dashboard() {
               {courses.map(course => (
                 <Link to={`/courses/${course.slug || course.id}`} key={course.id} style={{ textDecoration: 'none', color: 'inherit' }}>
                   <div className="card course-card">
-                    <div className="card-thumbnail" style={{
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: '2.5rem', background: 'var(--accent-gradient)'
-                    }}>📘</div>
+                    {course.thumbnail ? (
+                      <img src={course.thumbnail} alt={course.title} className="card-thumbnail" />
+                    ) : (
+                      <div className="card-thumbnail" style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        color: 'var(--accent-ink)', background: 'var(--accent-gradient)'
+                      }}><Icon name="book" size={40} /></div>
+                    )}
                     <div className="card-body">
                       <h3 className="card-title">{course.title}</h3>
                       <div className="card-meta">
@@ -207,28 +212,28 @@ export default function Dashboard() {
         <div>
           <div className="stats-grid">
             <div className="stat-card">
-              <div className="stat-icon purple">👥</div>
+              <div className="stat-icon purple"><Icon name="users" /></div>
               <div>
                 <div className="stat-value">{stats.totalUsers || 0}</div>
                 <div className="stat-label">Total Users</div>
               </div>
             </div>
             <div className="stat-card">
-              <div className="stat-icon green">📚</div>
+              <div className="stat-icon green"><Icon name="courses" /></div>
               <div>
                 <div className="stat-value">{stats.totalCourses || 0}</div>
                 <div className="stat-label">Total Courses</div>
               </div>
             </div>
             <div className="stat-card">
-              <div className="stat-icon yellow">⏳</div>
+              <div className="stat-icon yellow"><Icon name="clock" /></div>
               <div>
                 <div className="stat-value">{stats.pendingCourses || 0}</div>
                 <div className="stat-label">Pending Courses</div>
               </div>
             </div>
             <div className="stat-card">
-              <div className="stat-icon red">👨‍🏫</div>
+              <div className="stat-icon red"><Icon name="user" /></div>
               <div>
                 <div className="stat-value">{stats.pendingMentors || 0}</div>
                 <div className="stat-label">Pending Mentors</div>

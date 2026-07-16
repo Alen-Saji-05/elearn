@@ -57,10 +57,8 @@ class CourseViewSet(viewsets.ModelViewSet):
             if not self.request.user.is_authenticated or self.request.user.role == 'STUDENT':
                 qs = qs.filter(status='PUBLISHED')
             elif self.request.user.role == 'MENTOR':
-                # Mentors see their own + published
-                qs = qs.filter(
-                    models.Q(mentor=self.request.user) | models.Q(status='PUBLISHED')
-                )
+                # Mentors only manage their own courses (no browsing everyone else's)
+                qs = qs.filter(mentor=self.request.user)
         # Price range filtering
         min_price = self.request.query_params.get('min_price')
         max_price = self.request.query_params.get('max_price')

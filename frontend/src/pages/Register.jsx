@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import Icon from '../components/Icon';
 
 export default function Register() {
   const { register } = useAuth();
@@ -47,16 +48,16 @@ export default function Register() {
         {/* Role Selector */}
         <div className="role-selector">
           {[
-            { value: 'STUDENT', label: 'Student', icon: '🎓' },
-            { value: 'MENTOR', label: 'Mentor', icon: '👨‍🏫' },
-            { value: 'ADMIN', label: 'Admin', icon: '🛡️' },
+            { value: 'STUDENT', label: 'Student', icon: 'cap' },
+            { value: 'MENTOR', label: 'Mentor', icon: 'user' },
+            { value: 'ADMIN', label: 'Admin', icon: 'admin' },
           ].map(role => (
             <div
               key={role.value}
               className={`role-option ${form.role === role.value ? 'selected' : ''}`}
               onClick={() => setForm({ ...form, role: role.value })}
             >
-              <span className="role-icon">{role.icon}</span>
+              <span className="role-icon"><Icon name={role.icon} size={22} /></span>
               {role.label}
             </div>
           ))}

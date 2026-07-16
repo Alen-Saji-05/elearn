@@ -2,7 +2,10 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useWebSocket } from '../hooks/useWebSocket';
+import Icon from '../components/Icon';
 import api from '../api/axios';
+
+const CONTENT_ICON = { VIDEO: 'play', PDF: 'file', DOCUMENT: 'file', TEXT: 'text' };
 
 export default function CourseDetail() {
   const { slug } = useParams();
@@ -154,10 +157,25 @@ export default function CourseDetail() {
     setExpandedModules(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
+  const downloadCertificate = async () => {
+    if (!enrollment) return;
+    try {
+      const res = await api.get(`/enrollments/${enrollment.id}/certificate/`, { responseType: 'blob' });
+      const url = URL.createObjectURL(res.data);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `certificate_${course.slug || course.id}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      alert('Certificate is available once you complete the course.');
+    }
+  };
+
   if (loading) return <div className="loading-spinner"><div className="spinner"></div></div>;
   if (!course) return null;
-
-  const contentIcons = { VIDEO: '🎥', PDF: '📄', DOCUMENT: '📝', TEXT: '📖' };
 
   return (
     <div className="animate-fade-in">
@@ -168,15 +186,19 @@ export default function CourseDetail() {
             <span className="badge badge-purple">{course.level}</span>
             <span className="badge badge-green">{course.language}</span>
             {course.duration_hours > 0 && (
-              <span className="badge badge-yellow">⏱ {course.duration_hours}h</span>
+              <span className="badge badge-yellow">{course.duration_hours}h</span>
             )}
           </div>
           <h1>{course.title}</h1>
           <p className="description">{course.description}</p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-            <span>👤 {course.mentor?.first_name || course.mentor?.username}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem', flexWrap: 'wrap' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+              <Icon name="user" size={16} /> {course.mentor?.first_name || course.mentor?.username}
+            </span>
             <span className="rating-display">★ {course.avg_rating} ({course.total_reviews} reviews)</span>
-            <span>👨‍🎓 {course.total_enrollments} students</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+              <Icon name="users" size={16} /> {course.total_enrollments} students
+            </span>
           </div>
         </div>
 
@@ -200,9 +222,9 @@ export default function CourseDetail() {
                 Continue Learning
               </button>
               {enrollment.status === 'COMPLETED' && (
-                <a href={`/api/enrollments/${enrollment.id}/certificate/`} className="btn btn-secondary btn-lg" style={{ width: '100%', marginTop: '0.5rem' }}>
-                  🎓 Download Certificate
-                </a>
+                <button onClick={downloadCertificate} className="btn btn-secondary btn-lg" style={{ width: '100%', marginTop: '0.5rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
+                  <Icon name="award" size={18} /> Download Certificate
+                </button>
               )}
             </div>
           ) : (
@@ -226,7 +248,7 @@ export default function CourseDetail() {
             className={`tab ${activeTab === tab ? 'active' : ''}`}
             onClick={() => setActiveTab(tab)}
           >
-            {tab === 'curriculum' ? '📚 Curriculum' : tab === 'reviews' ? '⭐ Reviews' : '💬 Q&A'}
+            {tab === 'curriculum' ? 'Curriculum' : tab === 'reviews' ? 'Reviews' : 'Q&A'}
           </button>
         ))}
       </div>
@@ -236,7 +258,7 @@ export default function CourseDetail() {
         <div className="curriculum-section">
           {course.modules?.length === 0 ? (
             <div className="empty-state">
-              <div className="empty-icon">📚</div>
+              <div className="empty-icon"><Icon name="courses" size={44} /></div>
               <h3>No modules yet</h3>
             </div>
           ) : (
@@ -252,7 +274,7 @@ export default function CourseDetail() {
                   <div className="lesson-list">
                     {mod.lessons?.map(lesson => (
                       <div key={lesson.id} className="lesson-item">
-                        <span className="lesson-icon">{contentIcons[lesson.content_type] || '📖'}</span>
+                        <span className="lesson-icon"><Icon name={CONTENT_ICON[lesson.content_type] || 'text'} size={16} /></span>
                         <span>{lesson.title}</span>
                         {lesson.is_preview && <span className="badge badge-green" style={{ fontSize: '0.7rem' }}>Preview</span>}
                         <span className="lesson-duration">
@@ -303,7 +325,7 @@ export default function CourseDetail() {
           {/* Reviews List */}
           {reviews.length === 0 ? (
             <div className="empty-state">
-              <div className="empty-icon">⭐</div>
+              <div className="empty-icon"><Icon name="star" size={44} /></div>
               <h3>No reviews yet</h3>
             </div>
           ) : (
@@ -326,8 +348,8 @@ export default function CourseDetail() {
       {activeTab === 'qa' && (
         <div className="chat-panel">
           <div className="chat-header">
-            💬 Q&A Discussion
-            {connected && <span className="badge badge-green" style={{ marginLeft: 'auto' }}>● Live</span>}
+            <Icon name="chat" size={18} /> Q&A Discussion
+            {connected && <span className="badge badge-green" style={{ marginLeft: 'auto' }}>Live</span>}
           </div>
           <div className="chat-messages">
             {chatMessages.length === 0 ? (
@@ -342,7 +364,7 @@ export default function CourseDetail() {
                   </div>
                   <div className="chat-bubble">
                     <div className={`sender-name ${msg.sender_role === 'MENTOR' ? 'mentor' : ''}`}>
-                      {msg.sender_name || msg.sender} {msg.sender_role === 'MENTOR' && '🏅'}
+                      {msg.sender_name || msg.sender}{msg.sender_role === 'MENTOR' && ' · Mentor'}
                     </div>
                     <div className="message-text">{msg.content}</div>
                     <div className="message-time">

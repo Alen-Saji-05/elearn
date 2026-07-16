@@ -1,6 +1,7 @@
 from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate, get_user_model
 
@@ -80,11 +81,16 @@ class UserListView(generics.ListAPIView):
     search_fields = ['username', 'email', 'first_name', 'last_name']
 
 
-class UserDetailView(generics.RetrieveUpdateAPIView):
-    """Admin: view/update a specific user."""
+class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """Admin: view, update, or delete a specific user."""
     serializer_class = AdminUserSerializer
     permission_classes = [IsAdmin]
     queryset = User.objects.all()
+
+    def perform_destroy(self, instance):
+        if instance == self.request.user:
+            raise ValidationError('You cannot delete your own account.')
+        instance.delete()
 
 
 class ApproveMentorView(APIView):

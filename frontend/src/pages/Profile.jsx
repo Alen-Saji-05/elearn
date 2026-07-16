@@ -48,7 +48,7 @@ export default function Profile() {
         </span>
         {user?.role === 'MENTOR' && (
           <p style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: user?.is_approved ? 'var(--success)' : 'var(--warning)' }}>
-            {user?.is_approved ? '✅ Approved Mentor' : '⏳ Pending Approval'}
+            {user?.is_approved ? 'Approved Mentor' : 'Pending Approval'}
           </p>
         )}
       </div>

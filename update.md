@@ -257,6 +257,34 @@ App.jsx             router
 
 ---
 
+## 5b. Changes made (feature session — emoji/thumbnail/quiz/certs/admin)
+
+1. **Emoji removed** across the frontend — replaced with the shared line-icon set
+   (`components/Icon.jsx`, extended with `check/clock/users/book/play/file/text/edit/
+   trash/lock/award/chat/star/spark`). Kept `★`/`✓` as plain rating/typography glyphs.
+2. **Course thumbnails** — `CourseCreate` now uploads a thumbnail (multipart). Mentor
+   dashboard cards render the thumbnail (was a hard-coded placeholder). Backend already
+   had `Course.thumbnail`; no migration.
+3. **Full course builder** — `CourseCreate.jsx` rebuilt: course details + thumbnail, then
+   modules → lessons (each requires a video URL *or* reading text) → optional per-lesson
+   quiz. On submit it POSTs course (FormData) → modules → lessons (FormData; LessonViewSet
+   is MultiPart-only) → quizzes (JSON) → questions (JSON). Client-side validation enforces
+   "must add all lessons with video/text content".
+4. **Reading content** — lessons now carry both a video and `text_content`; `LessonPlayer`
+   renders the video *and* reading notes below it (not just YouTube). TEXT lessons render
+   the reading body.
+5. **Quizzes in the player** — `LessonPlayer` renders each lesson's quizzes with an
+   interactive `QuizBlock` (grades client-side against `correct_answer`, shows score,
+   marks right/wrong). "Mark as Complete" is gated until the lesson's quizzes are submitted.
+6. **Certificate download fixed** — the old `<a href="/api/.../certificate/">` sent no JWT
+   → 401. Now `LessonPlayer` and `CourseDetail` download via `api.get(..., {responseType:
+   'blob'})` and trigger a client download. Backend cert generation unchanged (reportlab).
+7. **Mentor "view all courses" removed** — Sidebar hides the Courses link for mentors;
+   `CourseViewSet.get_queryset` now returns only the mentor's own courses (was own+published).
+8. **Admin edit/delete users** — `AdminPanel` Users tab has Edit (modal → PATCH
+   `/users/<id>/`) and Delete (DELETE `/users/<id>/`). `UserDetailView` is now
+   `RetrieveUpdateDestroyAPIView` with a self-delete guard. Self-delete button hidden in UI.
+
 ## 6. Next candidates / known gaps
 - Notifications: NEW_LESSON / REFUND / ANNOUNCEMENT triggers + WebSocket push.
 - Search: synonyms, duration filter, mentor indexing, auto-sync on model changes.

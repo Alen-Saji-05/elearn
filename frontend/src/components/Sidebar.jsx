@@ -6,8 +6,11 @@ import Icon from './Icon';
 function buildNav(user) {
   const items = [
     { to: '/', label: 'Home', icon: 'home', end: true },
-    { to: '/courses', label: 'Courses', icon: 'courses' },
   ];
+  // Mentors manage only their own courses (from the dashboard) — no "browse all courses".
+  if (!user || user.role !== 'MENTOR') {
+    items.push({ to: '/courses', label: 'Courses', icon: 'courses' });
+  }
   if (user) {
     items.push({ to: '/dashboard', label: 'Dashboard', icon: 'dashboard' });
     if (user.role === 'MENTOR') {

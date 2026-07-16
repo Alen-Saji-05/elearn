@@ -2,9 +2,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useWebSocket } from '../hooks/useWebSocket';
+import Icon from '../components/Icon';
 import api from '../api/axios';
 
-const CONTENT_ICONS = { VIDEO: '🎥', PDF: '📄', DOCUMENT: '📝', TEXT: '📖' };
+const CONTENT_ICON = { VIDEO: 'play', PDF: 'file', DOCUMENT: 'file', TEXT: 'text' };
 
 export default function LessonPlayer() {
   const { slug } = useParams();
@@ -18,19 +19,20 @@ export default function LessonPlayer() {
   const [loading, setLoading] = useState(true);
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState('');
+  const [quizzesDone, setQuizzesDone] = useState(new Set()); // quiz ids submitted for current lesson
 
-  const { messages: wsMessages, sendMessage, connected } = useWebSocket(
+  const { messages: wsMessages, connected } = useWebSocket(
     enrollment ? course?.id : null,
     user?.id
   );
 
-  // Flat ordered list of {moduleId, lesson} for prev/next + auto-select
   const flatLessons = course
     ? course.modules.flatMap(m => m.lessons.map(l => ({ moduleId: m.id, lesson: l })))
     : [];
 
   const openLesson = useCallback(async (moduleId, lessonMeta) => {
     setLoadingLesson(true);
+    setQuizzesDone(new Set());
     try {
       const res = await api.get(`/courses/modules/${moduleId}/lessons/${lessonMeta.id}/`);
       setCurrent({ moduleId, lesson: res.data });
@@ -60,20 +62,17 @@ export default function LessonPlayer() {
         const mine = enrollRes.data.results || enrollRes.data;
         const found = mine.find(e => e.course === c.id || e.course_slug === c.slug);
         if (!found) {
-          // Not enrolled — send to the course page to enroll first
           navigate(`/courses/${c.slug || c.id}`);
           return;
         }
         setEnrollment(found);
         await loadProgress(found.id);
 
-        // Load this student's own private Q&A thread
         try {
           const chatRes = await api.get(`/chat/history/${c.id}/${user.id}/`);
           setChatMessages(chatRes.data.results || chatRes.data);
         } catch {}
 
-        // Auto-open first lesson
         const first = c.modules.flatMap(m => m.lessons.map(l => ({ moduleId: m.id, lesson: l })))[0];
         if (first) await openLesson(first.moduleId, first.lesson);
       } catch {
@@ -85,7 +84,6 @@ export default function LessonPlayer() {
     load();
   }, [slug]);
 
-  // Merge incoming WebSocket messages (dedupe by id)
   useEffect(() => {
     if (!wsMessages.length) return;
     setChatMessages(prev => {
@@ -95,7 +93,6 @@ export default function LessonPlayer() {
     });
   }, [wsMessages]);
 
-  // Safety-net poll: refetch authoritative history every 4s (only updates on change)
   useEffect(() => {
     if (!course || !user) return;
     const poll = () => api.get(`/chat/history/${course.id}/${user.id}/`)
@@ -138,6 +135,22 @@ export default function LessonPlayer() {
     }
   };
 
+  const downloadCertificate = async () => {
+    try {
+      const res = await api.get(`/enrollments/${enrollment.id}/certificate/`, { responseType: 'blob' });
+      const url = URL.createObjectURL(res.data);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `certificate_${course.slug || course.id}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      alert('Certificate is available once you complete the course.');
+    }
+  };
+
   const goNext = () => {
     const idx = flatLessons.findIndex(f => f.lesson.id === current?.lesson.id);
     const next = flatLessons[idx + 1];
@@ -151,6 +164,8 @@ export default function LessonPlayer() {
   const hasNext = idx >= 0 && idx < flatLessons.length - 1;
   const isDone = current && completedIds.has(current.lesson.id);
   const progress = Number(enrollment.progress_percent) || 0;
+  const lessonQuizzes = current?.lesson.quizzes || [];
+  const quizGatePassed = lessonQuizzes.length === 0 || lessonQuizzes.every(q => quizzesDone.has(q.id));
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: '1.5rem', alignItems: 'start' }}>
@@ -181,7 +196,7 @@ export default function LessonPlayer() {
                     color: active ? 'var(--accent-ink)' : 'var(--text-secondary)',
                   }}
                 >
-                  <span>{done ? '✅' : (CONTENT_ICONS[lesson.content_type] || '📖')}</span>
+                  <Icon name={done ? 'check' : (CONTENT_ICON[lesson.content_type] || 'text')} size={16} />
                   <span style={{ flex: 1 }}>{lesson.title}</span>
                   {lesson.duration_minutes > 0 && <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>{lesson.duration_minutes}m</span>}
                 </div>
@@ -199,27 +214,44 @@ export default function LessonPlayer() {
           <>
             <h1 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>{current.lesson.title}</h1>
             <LessonContent lesson={current.lesson} />
-            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem', flexWrap: 'wrap' }}>
+
+            {/* Quizzes for this lesson */}
+            {lessonQuizzes.map(quiz => (
+              <QuizBlock
+                key={quiz.id}
+                quiz={quiz}
+                onSubmitted={() => setQuizzesDone(prev => new Set(prev).add(quiz.id))}
+              />
+            ))}
+
+            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
               {isDone ? (
-                <button className="btn btn-secondary" disabled>✓ Completed</button>
+                <button className="btn btn-secondary" disabled>
+                  <Icon name="check" size={16} /> Completed
+                </button>
               ) : (
-                <button className="btn btn-primary" onClick={markComplete}>Mark as Complete</button>
+                <button className="btn btn-primary" onClick={markComplete} disabled={!quizGatePassed}>
+                  Mark as Complete
+                </button>
+              )}
+              {!isDone && !quizGatePassed && (
+                <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                  Submit the quiz to unlock completion.
+                </span>
               )}
               {hasNext && <button className="btn btn-ghost" onClick={goNext}>Next Lesson →</button>}
               {progress >= 100 && (
-                <a
-                  href={`/api/enrollments/${enrollment.id}/certificate/`}
-                  className="btn btn-secondary"
-                  target="_blank" rel="noreferrer"
-                >🎓 Download Certificate</a>
+                <button className="btn btn-secondary" onClick={downloadCertificate}>
+                  <Icon name="award" size={16} /> Download Certificate
+                </button>
               )}
             </div>
 
             {/* Course Q&A */}
             <div className="chat-panel" style={{ marginTop: '2rem' }}>
               <div className="chat-header">
-                💬 Course Q&A
-                {connected && <span className="badge badge-green" style={{ marginLeft: 'auto' }}>● Live</span>}
+                <Icon name="chat" size={18} /> Course Q&A
+                {connected && <span className="badge badge-green" style={{ marginLeft: 'auto' }}>Live</span>}
               </div>
               <div className="chat-messages" style={{ maxHeight: '340px' }}>
                 {chatMessages.length === 0 ? (
@@ -234,7 +266,7 @@ export default function LessonPlayer() {
                       </div>
                       <div className="chat-bubble">
                         <div className={`sender-name ${msg.sender_role === 'MENTOR' ? 'mentor' : ''}`}>
-                          {msg.sender_name || msg.sender} {msg.sender_role === 'MENTOR' && '🏅'}
+                          {msg.sender_name || msg.sender}{msg.sender_role === 'MENTOR' && ' · Mentor'}
                         </div>
                         <div className="message-text">{msg.content}</div>
                         <div className="message-time">
@@ -265,38 +297,114 @@ export default function LessonPlayer() {
 function LessonContent({ lesson }) {
   const { content_type, file, video_url, text_content } = lesson;
 
-  if (content_type === 'VIDEO') {
-    if (video_url) {
-      // Support YouTube/Vimeo embeds or direct files
-      const embed = toEmbedUrl(video_url);
-      return embed
-        ? <div style={{ position: 'relative', paddingTop: '56.25%' }}>
-            <iframe src={embed} title={lesson.title} allowFullScreen
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 0, borderRadius: '8px' }} />
-          </div>
-        : <video src={video_url} controls style={{ width: '100%', borderRadius: '8px' }} />;
+  const video = (() => {
+    if (content_type === 'VIDEO') {
+      if (video_url) {
+        const embed = toEmbedUrl(video_url);
+        return embed
+          ? <div style={{ position: 'relative', paddingTop: '56.25%' }}>
+              <iframe src={embed} title={lesson.title} allowFullScreen
+                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 0, borderRadius: '8px' }} />
+            </div>
+          : <video src={video_url} controls style={{ width: '100%', borderRadius: '8px' }} />;
+      }
+      if (file) return <video src={file} controls style={{ width: '100%', borderRadius: '8px' }} />;
     }
-    if (file) return <video src={file} controls style={{ width: '100%', borderRadius: '8px' }} />;
-  }
+    if (content_type === 'PDF' && file) {
+      return <iframe src={file} title={lesson.title} style={{ width: '100%', height: '75vh', border: 0, borderRadius: '8px' }} />;
+    }
+    if (content_type === 'DOCUMENT' && file) {
+      return (
+        <div>
+          <iframe src={file} title={lesson.title} style={{ width: '100%', height: '70vh', border: 0, borderRadius: '8px' }} />
+          <a href={file} className="btn btn-ghost btn-sm" target="_blank" rel="noreferrer" style={{ marginTop: '0.75rem' }}>Download document</a>
+        </div>
+      );
+    }
+    return null;
+  })();
 
-  if (content_type === 'PDF' && file) {
-    return <iframe src={file} title={lesson.title} style={{ width: '100%', height: '75vh', border: 0, borderRadius: '8px' }} />;
-  }
-
-  if (content_type === 'DOCUMENT' && file) {
-    return (
-      <div>
-        <iframe src={file} title={lesson.title} style={{ width: '100%', height: '70vh', border: 0, borderRadius: '8px' }} />
-        <a href={file} className="btn btn-ghost btn-sm" target="_blank" rel="noreferrer" style={{ marginTop: '0.75rem' }}>⬇ Download document</a>
+  const reading = text_content
+    ? (
+      <div style={{ marginTop: video ? '1.5rem' : 0 }}>
+        {video && <h3 style={{ fontSize: '1.05rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <Icon name="text" size={18} /> Reading notes
+        </h3>}
+        <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.7, color: 'var(--text-secondary)' }}>{text_content}</div>
       </div>
-    );
-  }
+    )
+    : null;
 
-  if (text_content) {
-    return <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.7, color: 'var(--text-secondary)' }}>{text_content}</div>;
+  if (!video && !reading) {
+    return <div className="empty-state"><p>No content for this lesson yet.</p></div>;
   }
+  return <>{video}{reading}</>;
+}
 
-  return <div className="empty-state"><p>No content for this lesson yet.</p></div>;
+function QuizBlock({ quiz, onSubmitted }) {
+  const [answers, setAnswers] = useState({});
+  const [submitted, setSubmitted] = useState(false);
+
+  const questions = quiz.questions || [];
+  const correctCount = questions.filter(q => answers[q.id] === q.correct_answer).length;
+  const allAnswered = questions.every(q => answers[q.id] !== undefined);
+
+  const submit = () => {
+    setSubmitted(true);
+    onSubmitted?.();
+  };
+
+  return (
+    <div className="card" style={{ marginTop: '1.5rem', background: 'var(--bg-tertiary)' }}>
+      <h3 style={{ fontSize: '1.05rem', marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <Icon name="spark" size={18} /> Quiz: {quiz.title}
+      </h3>
+      <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
+        Answer all questions, then submit to check your understanding.
+      </p>
+
+      {questions.map((q, qi) => (
+        <div key={q.id} style={{ marginBottom: '1.25rem' }}>
+          <div style={{ fontWeight: 600, marginBottom: '0.5rem' }}>{qi + 1}. {q.text}</div>
+          {q.options.map((opt, oi) => {
+            const chosen = answers[q.id] === oi;
+            const isCorrect = q.correct_answer === oi;
+            let bg = 'var(--bg-secondary)';
+            let border = '1px solid var(--border)';
+            if (submitted) {
+              if (isCorrect) { bg = 'var(--success-light)'; border = '1px solid var(--success)'; }
+              else if (chosen) { bg = 'var(--danger-light)'; border = '1px solid var(--danger)'; }
+            } else if (chosen) {
+              border = '1px solid var(--accent)';
+            }
+            return (
+              <label key={oi} style={{
+                display: 'flex', alignItems: 'center', gap: '0.6rem',
+                padding: '0.55rem 0.75rem', borderRadius: 'var(--radius-md)',
+                marginBottom: '0.4rem', cursor: submitted ? 'default' : 'pointer',
+                background: bg, border,
+              }}>
+                <input type="radio" name={`q-${q.id}`} disabled={submitted}
+                  checked={chosen} onChange={() => setAnswers(a => ({ ...a, [q.id]: oi }))} />
+                <span>{opt}</span>
+              </label>
+            );
+          })}
+        </div>
+      ))}
+
+      {submitted ? (
+        <div style={{ fontWeight: 600, color: correctCount === questions.length ? 'var(--success)' : 'var(--text-primary)' }}>
+          You scored {correctCount} / {questions.length}
+          {correctCount === questions.length ? ' — perfect!' : ''}
+        </div>
+      ) : (
+        <button type="button" className="btn btn-primary btn-sm" onClick={submit} disabled={!allAnswered}>
+          Submit Quiz
+        </button>
+      )}
+    </div>
+  );
 }
 
 function toEmbedUrl(url) {
