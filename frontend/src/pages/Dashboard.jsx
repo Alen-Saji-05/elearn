@@ -102,10 +102,6 @@ export default function Dashboard() {
               {enrollments.map(enrollment => (
                 <Link to={`/learn/${enrollment.course_slug || enrollment.course}`} key={enrollment.id} style={{ textDecoration: 'none', color: 'inherit' }}>
                   <div className="card course-card">
-                    <div className="card-thumbnail" style={{
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: 'var(--accent-ink)', background: 'var(--accent-gradient)'
-                    }}><Icon name="book" size={40} /></div>
                     <div className="card-body">
                       <h3 className="card-title">{enrollment.course_title}</h3>
                       <div style={{ marginTop: 'auto' }}>
@@ -176,10 +172,6 @@ export default function Dashboard() {
               {courses.map(course => (
                 <Link to={`/courses/${course.slug || course.id}`} key={course.id} style={{ textDecoration: 'none', color: 'inherit' }}>
                   <div className="card course-card">
-                    <div className="card-thumbnail" style={{
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: 'var(--accent-ink)', background: 'var(--accent-gradient)'
-                    }}><Icon name="book" size={40} /></div>
                     <div className="card-body">
                       <h3 className="card-title">{course.title}</h3>
                       <div className="card-meta">
