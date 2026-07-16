@@ -292,6 +292,132 @@ class Command(BaseCommand):
                     ]),
                 ],
             },
+            {
+                'mentor': mentors[0],
+                'title': 'JavaScript for Beginners',
+                'short_description': 'Learn modern JavaScript from scratch: variables, functions, the DOM, events, and async programming.',
+                'description': 'A beginner-friendly path into JavaScript, the language of the web. Cover variables and types, functions and scope, working with the DOM, handling events, ES6 features, arrays and objects, and making API calls with async/await and fetch.',
+                'price': Decimal('0.00'), 'level': 'BEGINNER', 'language': 'English',
+                'tags': 'javascript,web,frontend,beginner', 'duration_hours': 22,
+                'modules': [
+                    ('JavaScript Basics', [
+                        ('Variables, Types & Operators', 'TEXT', 'let, const and var, primitive types, template literals, and arithmetic/comparison operators.'),
+                        ('Functions & Scope', 'TEXT', 'Function declarations, arrow functions, parameters, return values, and lexical scope.'),
+                    ]),
+                    ('The DOM & Events', [
+                        ('Selecting & Changing the DOM', 'TEXT', 'querySelector, changing text and styles, creating and removing elements.'),
+                        ('Handling Events', 'TEXT', 'addEventListener, event objects, bubbling, and building interactive pages.'),
+                    ]),
+                    ('Modern JavaScript', [
+                        ('Arrays, Objects & ES6', 'TEXT', 'map/filter/reduce, destructuring, spread/rest, and modules.'),
+                        ('Async JS & Fetch', 'TEXT', 'Promises, async/await, and calling REST APIs with the fetch API.'),
+                    ]),
+                ],
+            },
+            {
+                'mentor': mentors[0],
+                'title': 'Cybersecurity Fundamentals',
+                'short_description': 'Understand core security concepts: threats, encryption, network defense, and safe practices.',
+                'description': 'Build a solid foundation in cybersecurity. Learn the CIA triad, common attack types, encryption basics, network defenses like firewalls and VPNs, authentication best practices, and how to respond to security incidents.',
+                'price': Decimal('69.99'), 'level': 'INTERMEDIATE', 'language': 'English',
+                'tags': 'cybersecurity,security,networking,ethical-hacking', 'duration_hours': 28,
+                'modules': [
+                    ('Security Foundations', [
+                        ('The CIA Triad & Threat Models', 'TEXT', 'Confidentiality, integrity, availability, and how to think about threats and risk.'),
+                        ('Common Attack Types', 'TEXT', 'Phishing, malware, SQL injection, XSS, and social engineering explained.'),
+                    ]),
+                    ('Network & Data Security', [
+                        ('Firewalls & VPNs', 'TEXT', 'How firewalls filter traffic, network segmentation, and securing connections with VPNs.'),
+                        ('Encryption Basics', 'TEXT', 'Symmetric vs asymmetric encryption, hashing, TLS, and public-key infrastructure.'),
+                    ]),
+                    ('Defensive Practices', [
+                        ('Passwords & Multi-Factor Auth', 'TEXT', 'Strong password policies, password managers, and why MFA matters.'),
+                        ('Incident Response', 'TEXT', 'Detecting, containing, and recovering from a security incident.'),
+                    ]),
+                ],
+            },
+            {
+                'mentor': mentors[0],
+                'title': 'DevOps with Docker and Kubernetes',
+                'short_description': 'Containerize apps with Docker, orchestrate them with Kubernetes, and automate delivery with CI/CD.',
+                'description': 'A hands-on DevOps course. Learn to build and run Docker containers, orchestrate them with Kubernetes (pods, deployments, services), and automate build/test/deploy with CI/CD pipelines, plus monitoring and logging.',
+                'price': Decimal('89.99'), 'level': 'ADVANCED', 'language': 'English',
+                'tags': 'devops,docker,kubernetes,ci-cd', 'duration_hours': 35,
+                'modules': [
+                    ('Containers with Docker', [
+                        ('Docker Fundamentals', 'TEXT', 'Images vs containers, the Dockerfile, layers, and the container lifecycle.'),
+                        ('Building & Running Images', 'TEXT', 'docker build/run, volumes, networking, and docker-compose for multi-service apps.'),
+                    ]),
+                    ('Orchestration with Kubernetes', [
+                        ('Kubernetes Concepts', 'TEXT', 'Pods, nodes, the control plane, and declarative configuration with YAML.'),
+                        ('Deployments & Services', 'TEXT', 'Deployments, ReplicaSets, Services, scaling, and rolling updates.'),
+                    ]),
+                    ('Continuous Delivery', [
+                        ('CI/CD Pipelines', 'TEXT', 'Automating build, test, and deploy with GitHub Actions.'),
+                        ('Monitoring & Logging', 'TEXT', 'Observability with metrics, logs, and health checks.'),
+                    ]),
+                ],
+            },
+            {
+                'mentor': mentors[1],
+                'title': 'AWS Cloud Practitioner Essentials',
+                'short_description': 'Get started with AWS: core services, the global infrastructure, security, and pricing.',
+                'description': 'An introduction to Amazon Web Services for beginners. Understand what cloud computing is, the AWS global infrastructure, core compute and storage services (EC2, S3), identity and access management, and how AWS pricing works.',
+                'price': Decimal('59.99'), 'level': 'BEGINNER', 'language': 'English',
+                'tags': 'aws,cloud,devops,infrastructure', 'duration_hours': 26,
+                'modules': [
+                    ('Cloud Basics', [
+                        ('What is Cloud Computing?', 'TEXT', 'On-demand resources, the shared responsibility model, and cloud service models (IaaS/PaaS/SaaS).'),
+                        ('AWS Global Infrastructure', 'TEXT', 'Regions, availability zones, edge locations, and choosing where to deploy.'),
+                    ]),
+                    ('Core AWS Services', [
+                        ('EC2 & Compute', 'TEXT', 'Virtual servers, instance types, and scaling with load balancers and auto scaling.'),
+                        ('S3 & Storage', 'TEXT', 'Object storage, buckets, storage classes, and durability.'),
+                        ('IAM & Security', 'TEXT', 'Users, roles, policies, and least-privilege access.'),
+                    ]),
+                ],
+            },
+            {
+                'mentor': mentors[0],
+                'title': 'Flutter Mobile App Development',
+                'short_description': 'Build cross-platform iOS and Android apps with Flutter and Dart.',
+                'description': 'Create beautiful native apps for iOS and Android from a single codebase. Learn the Dart language, Flutter widgets and layout, state management, navigation, calling REST APIs, and publishing to the app stores.',
+                'price': Decimal('74.99'), 'level': 'INTERMEDIATE', 'language': 'English',
+                'tags': 'flutter,mobile,dart,ios,android', 'duration_hours': 32,
+                'modules': [
+                    ('Dart & Flutter Basics', [
+                        ('Dart Language Essentials', 'TEXT', 'Variables, functions, classes, null safety, and async in Dart.'),
+                        ('Widgets & Layout', 'TEXT', 'Stateless vs stateful widgets, Rows, Columns, and the widget tree.'),
+                    ]),
+                    ('Building Real Apps', [
+                        ('State Management', 'TEXT', 'setState, Provider, and managing app state cleanly.'),
+                        ('Navigation & Routing', 'TEXT', 'Navigating between screens, passing data, and named routes.'),
+                    ]),
+                    ('Going Live', [
+                        ('Calling REST APIs', 'TEXT', 'Fetching data with http, parsing JSON, and showing loading/error states.'),
+                        ('Publishing Your App', 'TEXT', 'Building release versions and submitting to the App Store and Google Play.'),
+                    ]),
+                ],
+            },
+            {
+                'mentor': mentors[2],
+                'title': 'Digital Marketing Essentials',
+                'short_description': 'Reach and grow an audience with SEO, social media, and email marketing.',
+                'description': 'Learn practical digital marketing from the ground up. Understand the marketing funnel, define your audience, and run campaigns across SEO, social media, and email to attract and convert customers.',
+                'price': Decimal('44.99'), 'level': 'BEGINNER', 'language': 'English',
+                'tags': 'marketing,seo,social-media,email', 'duration_hours': 18,
+                'modules': [
+                    ('Marketing Foundations', [
+                        ('The Marketing Funnel', 'TEXT', 'Awareness, consideration, and conversion, and how to measure each stage.'),
+                        ('Audience & Personas', 'TEXT', 'Researching your audience and building buyer personas that guide your messaging.'),
+                    ]),
+                    ('Channels That Convert', [
+                        ('SEO Basics', 'TEXT', 'Keywords, on-page optimization, and how search engines rank content.'),
+                        ('Social Media Marketing', 'TEXT', 'Choosing platforms, content planning, and measuring engagement.'),
+                        ('Email Marketing', 'TEXT', 'Building a list, writing effective emails, and automation basics.'),
+                    ]),
+                ],
+            },
         ]
 
         courses = []

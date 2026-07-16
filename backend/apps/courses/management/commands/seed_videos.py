@@ -58,6 +58,26 @@ VIDEOS_BY_SLUG = {
         '7S_tz1z_5bA',  # MySQL Tutorial (Mosh)
         'ztHopE5Wnpc',  # Database design course
     ],
+    'javascript-for-beginners': [
+        'PkZNo7MFNFg',  # JavaScript Full Course (freeCodeCamp)
+        'W6NZfCO5SIk',  # JavaScript for Beginners (Mosh)
+        'hdI2bqOjy3c',  # JavaScript Crash Course (Traversy)
+    ],
+    'devops-with-docker-and-kubernetes': [
+        'fqMOX6JJhGo',  # Docker Tutorial (freeCodeCamp)
+        'd6WC5n9G_sM',  # Kubernetes Course (freeCodeCamp)
+        'nhNq2kIvi9s',  # CI/CD with GitHub Actions
+    ],
+    'aws-cloud-practitioner-essentials': [
+        'SOTamWNgDKc',  # AWS Cloud Practitioner (freeCodeCamp)
+        '3hLmDS179YE',  # AWS Certified Cloud Practitioner
+        'ulprqHHWlng',  # AWS Tutorial for Beginners
+    ],
+    'flutter-mobile-app-development': [
+        '1ukSR1GRtMU',  # Flutter Course for Beginners (freeCodeCamp)
+        'VPvVD8t02U8',  # Flutter Full Course
+        'x0uinJvhNxI',  # Flutter Crash Course
+    ],
 }
 
 # Fallback pool for any course/lesson not explicitly mapped.
