@@ -4,11 +4,12 @@ import axios from 'axios';
 // origin, so point at the backend via VITE_API_URL.
 const API_BASE = (import.meta.env.VITE_API_URL || '') + '/api';
 
+// NOTE: do NOT set a global 'Content-Type' here. axios auto-picks the right one
+// per request — application/json for object bodies, multipart/form-data (with the
+// required boundary) for FormData uploads. Forcing json broke file uploads
+// ("The submitted data was not a file").
 const api = axios.create({
   baseURL: API_BASE,
-  headers: {
-    'Content-Type': 'application/json',
-  },
 });
 
 const isGet = (config) => (config?.method || 'get').toLowerCase() === 'get';
