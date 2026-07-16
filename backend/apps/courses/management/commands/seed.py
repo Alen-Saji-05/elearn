@@ -52,6 +52,16 @@ class Command(BaseCommand):
             Course.objects.all().delete()
             User.objects.filter(is_superuser=False).delete()
 
+        # Idempotent guard: if the DB is already seeded and we're NOT flushing,
+        # do nothing. This lets `seed` run safely on every deploy without
+        # crashing on duplicate rows or wiping real data. Use --flush to reset.
+        if not options['flush'] and Course.objects.exists():
+            self.stdout.write(self.style.WARNING(
+                'Database already seeded - skipping. Run with --flush to reset, '
+                'or seed_videos + enrich_content to refresh content only.'
+            ))
+            return
+
         self.stdout.write('* Seeding database...\n')
 
         # ─── USERS ───────────────────────────────────────────────
